@@ -41,7 +41,7 @@ class TestGameIntegration(unittest.TestCase):
     #         Card(2, Suit.HEARTS),  # 2
     #     ]
     #
-    #     # Initialize players
+    #     # Initialise players
     #     self.game.players = [Player("ME"), Player("COMPUTER")]
     #
     #     # Deal initial cards manually to have control over what each player gets

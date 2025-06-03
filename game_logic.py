@@ -9,7 +9,7 @@ from collections import Counter
 class CardGame:
     FACE_VALUES = {
         'a': 14, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6,
-        '7': 7, '8': 8, '9': 9, '10': 10, 't': 10,
+        '7': 7, '8': 8, '9': 9, '10': 10,
         'j': 11, 'q': 12, 'k': 13
     }
 
@@ -142,14 +142,14 @@ class CardGame:
             target_value = max(c.value for c in face_up_cards) if face_up_cards else None
             remaining_cards = [card for i, card in enumerate(combined) if i not in used_indices]
 
-            # Prioritize special cards (2, 7, 8, 10)
+            # Prioritise special cards (2, 7, 8, 10)
             special_cards = [card for card in remaining_cards if card.value in [2, 7, 8, 10]]
             special_cards.sort(key=lambda c: c.value)  # Prefer lower-value special cards
             while len(face_up_cards) < 3 and special_cards:
                 face_up_cards.append(special_cards.pop(0))
                 used_indices.add(combined.index(face_up_cards[-1]))
 
-            # If still need more cards, prioritize highest-value cards
+            # If still need more cards, prioritise highest-value cards
             if len(face_up_cards) < 3:
                 remaining_cards = [card for i, card in enumerate(combined) if i not in used_indices]
                 remaining_cards.sort(key=lambda c: c.value, reverse=True)  # Prefer higher values
@@ -165,7 +165,7 @@ class CardGame:
         player.hand = [card for i, card in enumerate(combined) if i not in used_indices]
 
     def parse_face_up_choice(self, input_str: str, combined: List[Card]) -> Tuple[List[Card], List[Card]]:
-        # Normalize input: strip and lowercase
+        # Normalise input: strip and lowercase
         input_str = input_str.strip().lower()
 
         # Split on spaces if present, otherwise treat as single token
@@ -443,7 +443,6 @@ class CardGame:
         value_map = {
             '2': 2, '3': 3, '4': 4, '5': 5, '6': 6,
             '7': 7, '8': 8, '9': 9, '10': 10,
-            't': 10,
             'j': 11,
             'q': 12,
             'k': 13,

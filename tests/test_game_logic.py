@@ -112,7 +112,7 @@ class TestCardGame(unittest.TestCase):
 
     # def test_can_play_cards(self):
     #     """Test that can_play_cards returns the correct boolean."""
-    #     # Initialize game state with players
+    #     # Initialise game state with players
     #     self.game.deal_cards()
     #
     #     # Empty cards list

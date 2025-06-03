@@ -4,8 +4,8 @@ from models import Card, Player
 
 
 class TestCard(unittest.TestCase):
-    def test_card_initialization(self):
-        """Test that cards are initialized correctly."""
+    def test_card_initialisation(self):
+        """Test that cards are initialised correctly."""
         card = Card(10, Suit.HEARTS)
         self.assertEqual(card.value, 10)
         self.assertEqual(card.suit, Suit.HEARTS)
@@ -43,8 +43,8 @@ class TestPlayer(unittest.TestCase):
             Card(7, Suit.SPADES)
         ]
 
-    def test_player_initialization(self):
-        """Test that players are initialized correctly."""
+    def test_player_initialisation(self):
+        """Test that players are initialised correctly."""
         player = Player("Test Player")
         self.assertEqual(player.name, "Test Player")
         self.assertEqual(player.hand, [])
