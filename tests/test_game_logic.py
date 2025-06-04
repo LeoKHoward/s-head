@@ -1,8 +1,8 @@
 import unittest
+
 from enums import Suit
-from models import Card, Player
 from game_logic import CardGame
-from typing import List
+from models import Card, Player
 
 
 class TestGameLogic(unittest.TestCase):
@@ -37,7 +37,7 @@ class TestGameLogic(unittest.TestCase):
     def test_group_cards_by_value(self):
         """Test grouping cards by value."""
         cards = [Card(7, Suit.HEARTS), Card(7, Suit.SPADES), Card(10, Suit.CLUBS)]
-        groups = self.game.group_cards_by_value(cards)
+        groups = self.game.card_utils.group_cards_by_value(cards)
         self.assertEqual(len(groups), 2)
         self.assertEqual(len(groups[7]), 2)
         self.assertEqual(len(groups[10]), 1)
@@ -45,14 +45,11 @@ class TestGameLogic(unittest.TestCase):
     def test_get_pile_top_value_for_comparison(self):
         """Test getting pile top value, skipping special cards."""
         self.game.pile = [Card(5, Suit.HEARTS), Card(8, Suit.SPADES), Card(10, Suit.CLUBS)]
-        self.assertEqual(self.game.get_pile_top_value_for_comparison(self.game.pile),
-                         5)  # Changed self.pile to self.game.pile
+        self.assertEqual(self.game.card_utils.get_pile_top_value_for_comparison(self.game.pile), 5)
         self.game.pile = [Card(8, Suit.SPADES)]
-        self.assertEqual(self.game.get_pile_top_value_for_comparison(self.game.pile),
-                         None)  # Changed self.pile to self.game.pile
+        self.assertEqual(self.game.card_utils.get_pile_top_value_for_comparison(self.game.pile), None)
         self.game.pile = []
-        self.assertEqual(self.game.get_pile_top_value_for_comparison(self.game.pile),
-                         None)  # Changed self.pile to self.game.pile
+        self.assertEqual(self.game.card_utils.get_pile_top_value_for_comparison(self.game.pile), None)
 
     def test_can_play_cards_hand_phase(self):
         """Test card play validation in hand phase."""
@@ -60,14 +57,14 @@ class TestGameLogic(unittest.TestCase):
         self.game.pile = [Card(5, Suit.DIAMONDS)]
 
         # Same value, >= pile
-        self.assertTrue(self.game.can_play_cards([Card(7, Suit.HEARTS), Card(7, Suit.SPADES)]))
+        self.assertTrue(self.game.card_utils.can_play_cards([Card(7, Suit.HEARTS), Card(7, Suit.SPADES)]))
         # Special card (10)
-        self.assertTrue(self.game.can_play_cards([Card(10, Suit.CLUBS)]))
+        self.assertTrue(self.game.card_utils.can_play_cards([Card(10, Suit.CLUBS)]))
         # Invalid: different values
-        self.assertFalse(self.game.can_play_cards([Card(7, Suit.HEARTS), Card(10, Suit.CLUBS)]))
+        self.assertFalse(self.game.card_utils.can_play_cards([Card(7, Suit.HEARTS), Card(10, Suit.CLUBS)]))
         # Valid: 7 is a special card, playable on Ace
         self.game.pile = [Card(14, Suit.HEARTS)]
-        self.assertTrue(self.game.can_play_cards([Card(7, Suit.HEARTS)]))
+        self.assertTrue(self.game.card_utils.can_play_cards([Card(7, Suit.HEARTS)]))
 
     def test_can_play_cards_face_up_phase(self):
         """Test card play validation in face-up phase."""
@@ -76,32 +73,32 @@ class TestGameLogic(unittest.TestCase):
         self.game.pile = [Card(5, Suit.DIAMONDS)]
 
         # Mixed values with special card (10)
-        self.assertTrue(self.game.can_play_cards([Card(10, Suit.CLUBS), Card(14, Suit.SPADES)]))
+        self.assertTrue(self.game.card_utils.can_play_cards([Card(10, Suit.CLUBS), Card(14, Suit.SPADES)]))
         # Non-special cards >= pile
-        self.assertTrue(self.game.can_play_cards([Card(7, Suit.HEARTS), Card(14, Suit.SPADES)]))
+        self.assertTrue(self.game.card_utils.can_play_cards([Card(7, Suit.HEARTS), Card(14, Suit.SPADES)]))
         # Valid: 7 is a special card, playable on King
         self.game.pile = [Card(13, Suit.HEARTS)]
-        self.assertTrue(self.game.can_play_cards([Card(7, Suit.HEARTS)]))
+        self.assertTrue(self.game.card_utils.can_play_cards([Card(7, Suit.HEARTS)]))
 
     def test_can_play_nothing_card(self):
         """Test playing nothing card (8) with non-8 card."""
         self.player.hand = [Card(8, Suit.HEARTS), Card(7, Suit.SPADES)]
         self.game.pile = [Card(10, Suit.CLUBS)]
-        self.assertTrue(self.game.can_play_cards([Card(8, Suit.HEARTS), Card(7, Suit.SPADES)]))
+        self.assertTrue(self.game.card_utils.can_play_cards([Card(8, Suit.HEARTS), Card(7, Suit.SPADES)]))
         self.player.hand = [Card(8, Suit.HEARTS), Card(6, Suit.SPADES)]
         self.game.pile = [Card(14, Suit.HEARTS), Card(10, Suit.CLUBS)]
-        self.assertFalse(self.game.can_play_cards([Card(8, Suit.HEARTS), Card(6, Suit.SPADES)]))
+        self.assertFalse(self.game.card_utils.can_play_cards([Card(8, Suit.HEARTS), Card(6, Suit.SPADES)]))
 
     def test_play_cards_burn(self):
         """Test pile burning with 10 or four-of-a-kind."""
         self.player.hand = [Card(10, Suit.CLUBS)]
-        self.assertTrue(self.game.play_cards(self.player, [Card(10, Suit.CLUBS)]))
+        self.assertTrue(self.game.card_utils.play_cards(self.player, [Card(10, Suit.CLUBS)]))
         self.assertEqual(self.game.pile, [])
         self.assertEqual(self.player.hand, [])
 
         self.game.pile = [Card(7, Suit.HEARTS), Card(7, Suit.SPADES), Card(7, Suit.CLUBS)]
         self.player.hand = [Card(7, Suit.DIAMONDS)]
-        self.assertTrue(self.game.play_cards(self.player, [Card(7, Suit.DIAMONDS)]))
+        self.assertTrue(self.game.card_utils.play_cards(self.player, [Card(7, Suit.DIAMONDS)]))
         self.assertEqual(self.game.pile, [])
 
     def test_draw_card(self):
@@ -114,10 +111,10 @@ class TestGameLogic(unittest.TestCase):
 
     def test_parse_card_value(self):
         """Test parsing card value input."""
-        self.assertEqual(self.game.parse_card_value("a"), 14)
-        self.assertEqual(self.game.parse_card_value("10"), 10)
-        self.assertEqual(self.game.parse_card_value("j"), 11)
-        self.assertIsNone(self.game.parse_card_value("x"))
+        self.assertEqual(self.game.input_utils.parse_card_value("a"), 14)
+        self.assertEqual(self.game.input_utils.parse_card_value("10"), 10)
+        self.assertEqual(self.game.input_utils.parse_card_value("j"), 11)
+        self.assertIsNone(self.game.input_utils.parse_card_value("x"))
 
     def test_check_game_over(self):
         """Test game over condition."""
@@ -137,9 +134,13 @@ class TestGameLogic(unittest.TestCase):
         player = Player("COMPUTER")
         player.hand = [Card(10, Suit.SPADES), Card(11, Suit.SPADES), Card(12, Suit.HEARTS)]
         player.face_up = [Card(8, Suit.SPADES), Card(2, Suit.HEARTS), Card(5, Suit.HEARTS)]
-        self.game.choose_ai_setup_cards(player)
+        self.game.ai_logic.choose_ai_setup_cards(player)
         expected_face_up_values = {8, 10, 12}  # 8♠, 10♠, Q♥
         actual_face_up_values = {card.value for card in player.face_up}
         self.assertEqual(actual_face_up_values, expected_face_up_values)
         self.assertEqual(len(player.face_up), 3)
         self.assertEqual(len(player.hand), 3)
+
+
+if __name__ == '__main__':
+    unittest.main()

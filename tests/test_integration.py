@@ -71,7 +71,7 @@ class TestGameIntegration(unittest.TestCase):
     #     ]
     #
     #     # Player chooses the first set
-    #     chosen_set = self.game.handle_player_input(playable_sets)
+    #     chosen_set = self.game.input_utils.handle_player_input(playable_sets)
     #     self.assertEqual(chosen_set, playable_sets[0])
 
     def test_computer_choose_playable_set(self):
@@ -86,7 +86,7 @@ class TestGameIntegration(unittest.TestCase):
         top_pile_value = 12
 
         # Computer should choose 2 to reset the pile
-        chosen_set = self.game.computer_choose_playable_set(playable_sets, top_pile_value)
+        chosen_set = self.game.ai_logic.computer_choose_playable_set(playable_sets, top_pile_value)
         self.assertEqual(chosen_set[0].value, 2)
 
         # Set up pile with a low value
@@ -98,7 +98,7 @@ class TestGameIntegration(unittest.TestCase):
             [Card(7, Suit.DIAMONDS)],
             [Card(10, Suit.CLUBS)]
         ]
-        chosen_set = self.game.computer_choose_playable_set(playable_sets, top_pile_value)
+        chosen_set = self.game.ai_logic.computer_choose_playable_set(playable_sets, top_pile_value)
         self.assertEqual(chosen_set[0].value, 5)
 
     def test_full_game_setup(self):
@@ -138,7 +138,7 @@ class TestGameIntegration(unittest.TestCase):
         ]
 
         # Run AI setup
-        self.game.choose_ai_setup_cards(player)
+        self.game.ai_logic.choose_ai_setup_cards(player)
 
         # Verify the AI chose 3 face-up cards
         self.assertEqual(len(player.face_up), 3)
@@ -155,7 +155,7 @@ class TestGameIntegration(unittest.TestCase):
 
         # Test playing a regular card
         self.game.pile = [Card(3, Suit.SPADES)]
-        another_turn = self.game.play_cards(player, [Card(5, Suit.HEARTS)])
+        another_turn = self.game.card_utils.play_cards(player, [Card(5, Suit.HEARTS)])
 
         self.assertFalse(another_turn)  # Regular card doesn't give another turn
         self.assertEqual(len(player.hand), 1)
@@ -163,7 +163,7 @@ class TestGameIntegration(unittest.TestCase):
         self.assertEqual(self.game.pile[-1].value, 5)
 
         # Test playing a 10 (burn card)
-        another_turn = self.game.play_cards(player, [Card(10, Suit.DIAMONDS)])
+        another_turn = self.game.card_utils.play_cards(player, [Card(10, Suit.DIAMONDS)])
 
         self.assertTrue(another_turn)  # 10 gives another turn
         self.assertEqual(len(player.hand), 0)
