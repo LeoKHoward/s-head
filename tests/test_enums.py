@@ -2,20 +2,22 @@ import unittest
 from enums import Suit
 
 
-class TestSuit(unittest.TestCase):
+class TestEnums(unittest.TestCase):
     def test_suit_values(self):
-        """Test that all suits have the correct symbol values."""
+        """Test that Suit enum has correct values."""
         self.assertEqual(Suit.HEARTS.value, "♥")
         self.assertEqual(Suit.DIAMONDS.value, "♦")
         self.assertEqual(Suit.CLUBS.value, "♣")
         self.assertEqual(Suit.SPADES.value, "♠")
 
-    def test_suit_enum_behavior(self):
-        """Test that the enum works as expected."""
-        self.assertIsInstance(Suit.HEARTS, Suit)
-        self.assertEqual(list(Suit), [Suit.HEARTS, Suit.DIAMONDS, Suit.CLUBS, Suit.SPADES])
-        self.assertEqual(Suit("♥"), Suit.HEARTS)
+    def test_suit_members(self):
+        """Test that Suit enum contains exactly the expected members."""
+        expected_suits = ["HEARTS", "DIAMONDS", "CLUBS", "SPADES"]
+        actual_suits = [suit.name for suit in Suit]
+        self.assertEqual(actual_suits, expected_suits)
+        self.assertEqual(len(Suit), 4)
 
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_suit_immutability(self):
+        """Test that Suit enum values cannot be modified."""
+        with self.assertRaises(AttributeError):
+            Suit.HEARTS.value = "X"

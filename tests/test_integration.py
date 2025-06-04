@@ -61,7 +61,7 @@ class TestGameIntegration(unittest.TestCase):
     #
     #     # Check that the computer player has face up cards
     #     self.assertEqual(len(self.game.players[1].face_up), 3)
-
+    #
     # @patch('builtins.input', return_value='1')
     # def test_handle_player_input(self, mock_input):
     #     """Test that handle_player_input processes input correctly."""

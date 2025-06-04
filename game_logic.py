@@ -78,11 +78,13 @@ class CardGame:
             # If includes 8s, allow one non-8 card that is special or >= underlying pile value
             if any(card.value == 8 for card in cards):
                 non_eights = [card for card in cards if card.value != 8]
-                if len(non_eights) <= 1:  # Allow at most one non-8 card
-                    underlying_value = self.get_pile_top_value_for_comparison(self.pile[:-1]) or 0 if self.pile else 0
-                    return not non_eights or (non_eights[0].value in [2, 5, 7, 8, 10] or self._base_card_value(
-                        non_eights[0]) >= underlying_value)
-                return False
+                if len(non_eights) > 1:
+                    return False
+                underlying_value = self.get_pile_top_value_for_comparison(self.pile[:-1]) or 0 if self.pile else 0
+                return not non_eights or (
+                        non_eights[0].value in [2, 7, 8, 10] or
+                        self._base_card_value(non_eights[0]) >= underlying_value
+                )
             # Otherwise, all cards must be same value and either special or >= pile_value
             if not all(card.value == cards[0].value for card in cards):
                 return False
@@ -90,14 +92,11 @@ class CardGame:
             return cards[0].value in [2, 7, 8, 10] or card_value >= pile_value
 
         # Face-up phase: allow mixed values, but all non-special cards must be >= pile_value
-        has_special = False
         for card in cards:
             card_value = self._base_card_value(card)
-            if card.value in [2, 7, 8, 10]:
-                has_special = True
-            elif card_value < pile_value:
+            if card.value not in [2, 7, 8, 10] and card_value < pile_value:
                 return False
-        return has_special or all(self._base_card_value(card) >= pile_value for card in cards)
+        return True
 
     def find_playable_combinations(self, cards: List[Card]) -> List[List[Card]]:
         playable = []
@@ -121,45 +120,57 @@ class CardGame:
 
     def choose_ai_setup_cards(self, player: Player):
         combined = player.hand + player.face_up
-        groups = self.group_cards_by_value(combined)
-        # Sort groups by size (descending) and then by value (descending)
-        sorted_groups = sorted(groups.values(), key=lambda g: (len(g), max(c.value for c in g)), reverse=True)
-
         face_up_cards = []
         used_indices = set()
 
-        # Step 1: Take the highest-value group among the largest groups
-        if sorted_groups:
-            max_size = max(len(g) for g in sorted_groups)
-            largest_groups = [g for g in sorted_groups if len(g) == max_size]
-            highest_value_group = max(largest_groups, key=lambda g: max(c.value for c in g))
-            face_up_cards.extend(highest_value_group)
-            for card in highest_value_group:
-                used_indices.add(combined.index(card))
+        # Group cards by value to identify sets
+        value_groups = self.group_cards_by_value(combined)
+        # Define priority: 8 and 10 are top priority, then high-value sets (9 or higher), then high single cards
+        card_priority = {8: 1, 10: 2}  # 8 and 10 are highest priority
+        high_value_threshold = 9  # Cards 9, J, Q, K, A are considered high-value
 
-        # Step 2: Fill remaining slots (up to 3) with special cards or highest-value cards
-        if len(face_up_cards) < 3:
-            target_value = max(c.value for c in face_up_cards) if face_up_cards else None
-            remaining_cards = [card for i, card in enumerate(combined) if i not in used_indices]
+        # Step 1: Collect cards in order of priority
+        prioritized_cards = []
+        # First, add all 8s and 10s
+        for value in [8, 10]:
+            if value in value_groups:
+                prioritized_cards.extend(value_groups[value])
+                del value_groups[value]  # Remove used cards
 
-            # Prioritise special cards (2, 7, 8, 10)
-            special_cards = [card for card in remaining_cards if card.value in [2, 7, 8, 10]]
-            special_cards.sort(key=lambda c: c.value)  # Prefer lower-value special cards
-            while len(face_up_cards) < 3 and special_cards:
-                face_up_cards.append(special_cards.pop(0))
-                used_indices.add(combined.index(face_up_cards[-1]))
-
-            # If still need more cards, prioritise highest-value cards
-            if len(face_up_cards) < 3:
-                remaining_cards = [card for i, card in enumerate(combined) if i not in used_indices]
-                remaining_cards.sort(key=lambda c: c.value, reverse=True)  # Prefer higher values
-
-                for card in remaining_cards:
-                    if len(face_up_cards) < 3:
-                        face_up_cards.append(card)
-                        used_indices.add(combined.index(card))
-                    else:
+        # Step 2: If fewer than 3 cards, add sets of high-value cards (9 or higher)
+        if len(prioritized_cards) < 3:
+            for value, cards in sorted(value_groups.items(), key=lambda x: (-len(x[1]), -x[0])):
+                if value >= high_value_threshold and len(cards) >= 2:
+                    prioritized_cards.extend(cards)
+                    if len(prioritized_cards) >= 3:
                         break
+
+        # Step 3: If still fewer than 3 cards, add single high-value cards
+        if len(prioritized_cards) < 3:
+            for value, cards in sorted(value_groups.items(), key=lambda x: -x[0]):
+                if value >= high_value_threshold:
+                    prioritized_cards.extend(cards)
+                    if len(prioritized_cards) >= 3:
+                        break
+
+        # Step 4: If still fewer than 3 cards, consider sets of 2s or 7s
+        if len(prioritized_cards) < 3:
+            for value, cards in sorted(value_groups.items(), key=lambda x: (-len(x[1]), x[0])):
+                if value in [2, 7] and len(cards) >= 2:
+                    prioritized_cards.extend(cards)
+                    if len(prioritized_cards) >= 3:
+                        break
+
+        # Step 5: If still fewer than 3 cards, fill with highest-value remaining cards
+        if len(prioritized_cards) < 3:
+            remaining = [card for card in combined if card not in prioritized_cards]
+            remaining.sort(key=lambda c: c.value, reverse=True)
+            prioritized_cards.extend(remaining)
+
+        # Step 6: Select up to 3 cards for face-up
+        for card in prioritized_cards[:3]:
+            face_up_cards.append(card)
+            used_indices.add(combined.index(card))
 
         player.face_up = face_up_cards
         player.hand = [card for i, card in enumerate(combined) if i not in used_indices]
@@ -430,11 +441,13 @@ class CardGame:
         print(f"Deck remaining: {len(self.deck)}")
 
     def check_game_over(self) -> bool:
-        for player in self.players:
-            if not player.has_cards():
-                self.game_over = True
-                self.winner = player
-                return True
+        players_with_no_cards = [player for player in self.players if not player.has_cards()]
+        if len(players_with_no_cards) == 1:
+            self.game_over = True
+            self.winner = players_with_no_cards[0]
+            return True
+        self.game_over = False
+        self.winner = None
         return False
 
     def parse_card_value(self, val: str) -> int | None:
