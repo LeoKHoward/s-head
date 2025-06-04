@@ -1,6 +1,6 @@
 from typing import List, Optional
-from models import Card, Player
-from card_utils import CardUtils
+from backend.models import Card, Player
+from backend.card_utils import CardUtils
 
 
 class AILogic:

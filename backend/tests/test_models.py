@@ -1,6 +1,6 @@
 import unittest
-from enums import Suit
-from models import Card, Player
+from backend.enums import Suit
+from backend.models import Card, Player
 
 
 class TestModels(unittest.TestCase):

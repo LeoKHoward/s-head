@@ -1,10 +1,10 @@
 import random
 from typing import List, Optional
-from enums import Suit
-from models import Card, Player
-from card_utils import CardUtils
-from ai_logic import AILogic
-from input_utils import InputUtils
+
+from backend.ai_logic import AILogic
+from backend.card_utils import CardUtils
+from backend.input_utils import InputUtils
+from backend.models import Card, Player
 
 
 class CardGame:

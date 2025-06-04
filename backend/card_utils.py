@@ -1,6 +1,6 @@
 from typing import List, Dict
-from enums import Suit
-from models import Card, Player
+from backend.enums import Suit
+from backend.models import Card, Player
 from itertools import combinations
 
 

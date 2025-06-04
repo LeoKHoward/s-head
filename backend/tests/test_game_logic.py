@@ -1,8 +1,8 @@
 import unittest
 
-from enums import Suit
-from game_logic import CardGame
-from models import Card, Player
+from backend.enums import Suit
+from backend.game_logic import CardGame
+from backend.models import Card, Player
 
 
 class TestGameLogic(unittest.TestCase):

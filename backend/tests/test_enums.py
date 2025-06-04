@@ -1,5 +1,5 @@
 import unittest
-from enums import Suit
+from backend.enums import Suit
 
 
 class TestEnums(unittest.TestCase):

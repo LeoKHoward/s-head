@@ -1,10 +1,8 @@
 import unittest
-from io import StringIO
-from unittest.mock import patch
 
-from enums import Suit
-from game_logic import CardGame
-from models import Card, Player
+from backend.enums import Suit
+from backend.game_logic import CardGame
+from backend.models import Card, Player
 
 
 class TestGameIntegration(unittest.TestCase):

@@ -1,4 +1,4 @@
-from enums import Suit
+from backend.enums import Suit
 from typing import List
 
 

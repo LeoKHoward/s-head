@@ -1,5 +1,5 @@
 from typing import List, Tuple, Optional
-from models import Card
+from backend.models import Card
 from collections import Counter
 
 
