@@ -9,57 +9,65 @@ class AILogic:
         self.card_utils = CardUtils(self.game)
 
     def choose_ai_setup_cards(self, player: Player):
+        # Combine all available cards (hand + face_up)
         combined = player.hand + player.face_up
-        face_up_cards = []
-        used_indices = set()
 
+        # Group cards by value for easier selection
         value_groups = self.card_utils.group_cards_by_value(combined)
         high_value_threshold = 9
 
         prioritised_cards = []
-        # Prioritise 8s and 10s
+
+        # Prioritise 8s and 10s (special cards)
         for value in [8, 10]:
             if value in value_groups:
                 prioritised_cards.extend(value_groups[value])
+                # Remove from value_groups to avoid reprocessing
                 del value_groups[value]
 
-        # Add sets of high-value cards (9 or higher)
+        # Add sets of high-value cards (9 or higher) - prioritize larger sets
         if len(prioritised_cards) < 3:
             for value, cards in sorted(value_groups.items(), key=lambda x: (-len(x[1]), -x[0])):
                 if value >= high_value_threshold and len(cards) >= 2:
-                    prioritised_cards.extend(cards)
+                    needed = 3 - len(prioritised_cards)
+                    prioritised_cards.extend(cards[:needed])
                     if len(prioritised_cards) >= 3:
                         break
 
-        # Add single high-value cards
+        # Add single high-value cards if still needed
         if len(prioritised_cards) < 3:
             for value, cards in sorted(value_groups.items(), key=lambda x: -x[0]):
                 if value >= high_value_threshold:
-                    prioritised_cards.extend(cards)
+                    needed = 3 - len(prioritised_cards)
+                    prioritised_cards.extend(cards[:needed])
                     if len(prioritised_cards) >= 3:
                         break
 
-        # Add sets of 2s or 7s
+        # Add sets of 2s or 7s (special low cards)
         if len(prioritised_cards) < 3:
             for value, cards in sorted(value_groups.items(), key=lambda x: (-len(x[1]), x[0])):
                 if value in [2, 7] and len(cards) >= 2:
-                    prioritised_cards.extend(cards)
+                    needed = 3 - len(prioritised_cards)
+                    prioritised_cards.extend(cards[:needed])
                     if len(prioritised_cards) >= 3:
                         break
 
-        # Fill with remaining highest-value cards
+        # Fill remaining slots with highest-value cards
         if len(prioritised_cards) < 3:
             remaining = [card for card in combined if card not in prioritised_cards]
             remaining.sort(key=lambda c: c.value, reverse=True)
-            prioritised_cards.extend(remaining)
+            needed = 3 - len(prioritised_cards)
+            prioritised_cards.extend(remaining[:needed])
 
-        # Select up to 3 cards for face-up
-        for card in prioritised_cards[:3]:
-            face_up_cards.append(card)
-            used_indices.add(combined.index(card))
+        # Select exactly 3 cards for face-up (no more, no less)
+        face_up_cards = prioritised_cards[:3]
 
+        # Create hand from remaining cards
+        hand_cards = [card for card in combined if card not in face_up_cards]
+
+        # Update player's cards
         player.face_up = face_up_cards
-        player.hand = [card for i, card in enumerate(combined) if i not in used_indices]
+        player.hand = hand_cards
 
     def get_best_ai_play(self, player: Player, playable_sets: List[List[Card]]) -> Optional[List[Card]]:
         non_eights = [s for s in playable_sets if s[0].value != 8]
