@@ -28,7 +28,7 @@ class CardGame:
     def deal_cards(self):
         self.deck = self.create_deck()
         self.shuffle_deck()
-        self.players = [Player("ME"), Player("COMPUTER")]
+        self.players = [Player("Leo"), Player("Computer")]
         for player in self.players:
             player.face_down = [self.deck.pop() for _ in range(3)]
             player.face_up = [self.deck.pop() for _ in range(3)]
@@ -54,7 +54,8 @@ class CardGame:
         for i, player in enumerate(self.players):
             current = " (CURRENT)" if i == self.current_player else ""
             print(f"\n{player.name}{current}:")
-            print(f"  Hand ({len(player.hand)}): {player.hand if player.hand else 'Empty'}")
+            hand_display = player.hand if player.name == "Leo" else '[Hidden]' if player.hand else 'Empty'
+            print(f"  Hand ({len(player.hand)}): {hand_display}")
             print(f"  Face-up ({len(player.face_up)}): {player.face_up if player.face_up else 'Empty'}")
             face_down_str = '[Hidden] ' * len(player.face_down) if player.face_down else 'Empty'
             print(f"  Face-down ({len(player.face_down)}): {face_down_str}")
@@ -80,13 +81,16 @@ class CardGame:
 
         for player in self.players:
             print(f"\n{player.name}'s turn to set up:")
-            print(f"Hand: {player.hand}")
-            print(f"Face-up: {player.face_up}")
+            if player.name == "Leo":
+                print(f"Your Hand: {player.hand}")
+                print(f"Your Face-up: {player.face_up}")
+            else:
+                print(f"Face-up: {player.face_up}")
 
             combined = player.hand + player.face_up
             combined_sorted_desc = sorted(combined, key=lambda c: c.value, reverse=True)
 
-            if player.name == "ME":
+            if player.name == "Leo":
                 while True:
                     print("You have the following 6 cards to choose from:")
                     for idx, card in enumerate(combined_sorted_desc):
@@ -119,7 +123,9 @@ class CardGame:
                 self.ai_logic.choose_ai_setup_cards(player)
 
             player.face_up.sort(key=lambda card: card.value)
-            print(f"After setup - Hand: {player.hand}, Face-up: {player.face_up}")
+            print(f"After setup - Face-up: {player.face_up}")
+            if player.name == "Leo":
+                print(f"Your Hand: {player.hand}")
 
     def player_turn(self, player: Player) -> bool:
         print(f"\n{player.name}'s turn:")
@@ -131,7 +137,7 @@ class CardGame:
             print(f"Face-down cards available: {len(player.face_down)}")
             valid_positions = player.face_down_positions
 
-            if player.name == "COMPUTER":
+            if player.name == "Computer":
                 choice = random.choice(valid_positions)
                 chosen_index = player.face_down_positions.index(choice)
                 chosen_cards = [player.face_down[chosen_index]]
@@ -178,7 +184,7 @@ class CardGame:
             return False
 
         top_value = self.card_utils.get_top_pile_value()
-        if player.name == "ME" and player.hand:
+        if player.name == "Leo" and player.hand:
             can_play = False
             has_eight = False
             for s in playable_sets:
@@ -211,7 +217,7 @@ class CardGame:
                 self.draw_card(player)
                 return False
 
-        if player.name == "COMPUTER":
+        if player.name == "Computer":
             chosen_cards = self.ai_logic.computer_choose_playable_set(playable_sets, top_value, player)
             if chosen_cards:
                 print(f"{player.name} plays: {chosen_cards}")

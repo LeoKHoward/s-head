@@ -66,10 +66,19 @@ class InputUtils:
 
     def handle_player_input(self, playable_sets: List[List[Card]]) -> Optional[List[Card]]:
         while True:
-            choice = input("Choose cards to play: ").strip().lower()
+            choice = input(
+                "Choose cards to play (or 'tp' for tactical pickup, 'help' for assistance): ").strip().lower()
             if choice == "tp":
                 print("You performed a TACTICAL PICKUP!")
                 return None
+            if choice == "help":
+                print("\nHELP:")
+                print("Enter card values to play (e.g. '7 7', '10', 'aa')")
+                print("Valid values: 2-10, j (Jack), q (Queen), k (King), a (Ace)")
+                print("Enter 'tp' to pick up the pile tactically")
+                print("You must play cards >= pile's top value or special cards (2, 7, 8, 10)")
+                print(f"Your playable sets: {[', '.join(str(card) for card in s) for s in playable_sets]}")
+                continue
 
             if ' ' in choice:
                 tokens = choice.split()
@@ -90,8 +99,7 @@ class InputUtils:
                     raise KeyError(tokens[values.index(None)])
             except KeyError as e:
                 print(
-                    f"Invalid card value '{e.args[0]}'. Please enter valid card values (e.g. '7 7', 'aa') or 'tp' "
-                    f"to pick up pile!")
+                    f"Invalid card value '{e.args[0]}'. Enter valid card values (e.g. '7 7', 'aa'), 'tp', or 'help'")
                 continue
 
             input_counter = Counter(values)
@@ -101,4 +109,4 @@ class InputUtils:
                     return s
 
             print(
-                f"No playable set matches '{' '.join(tokens)}'. Please enter valid card values or 'tp' to pick up pile.")
+                f"No playable set matches '{' '.join(tokens)}'. Enter valid card values, 'tp', or 'help'")
